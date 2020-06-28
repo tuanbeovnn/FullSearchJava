@@ -234,6 +234,45 @@ public class SimpleJpaRepository<T> implements JpaRepository<T> {// ngoài T ta 
         return null;
     }
 
+    @Override
+    public T findById(Long id) {
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table table = zClass.getAnnotation(Table.class);
+            tableName = table.name();
+        }
+        String sql = "SELECT * FROM " + tableName + " WHERE id = ? ";
+        ResultSetMapper<T> resultSetMapper = new ResultSetMapper<>();
+        List<T> results = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = EntityManagerFactory.getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setLong(1,id);
+            resultSet = statement.executeQuery();
+            results = resultSetMapper.mapRow(resultSet, this.zClass);
+            return results.isEmpty() ? null : results.get(0);
+        }catch (SQLException e) {
+            return null;
+        }finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            }catch (SQLException e) {
+                return null;
+            }
+        }
+    }
+
     private String createSQLInsert() {
         String tableName = "";
         if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {

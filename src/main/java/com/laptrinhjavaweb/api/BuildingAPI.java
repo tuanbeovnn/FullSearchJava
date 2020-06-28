@@ -44,6 +44,7 @@ public class BuildingAPI extends HttpServlet {
                 .build();
         Pageable pageable = new PageRequest(building.getPage(), building.getLimit());
         List<Buildingdto> buildings = buildingService.findAll(buildingSearchBuilder, pageable);
+//        Buildingdto buildingdto = buildingService.findById(building.getId());
         mapper.writeValue(response.getOutputStream(), buildings);
     }
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

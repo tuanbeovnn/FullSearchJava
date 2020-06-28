@@ -58,6 +58,13 @@ public class BuildingService implements IBuildingService {
         return null;
     }
 
+    @Override
+    public Buildingdto findById(Long id) {
+        BuildingEntity buildingEntity = buildingRepository.findById(id);
+        Buildingdto buildingdto = buildingConverter.convertToDTO(buildingEntity);
+        return buildingdto;
+    }
+
     private String buildSqlSpecial(BuildingSearchBuilder fieldSearch){
         StringBuilder result = new StringBuilder("");
         if (StringUtils.isNotBlank(fieldSearch.getCostRentFrom())){

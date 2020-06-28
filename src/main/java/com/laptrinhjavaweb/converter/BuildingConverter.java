@@ -21,4 +21,10 @@ public class BuildingConverter {
         }
         return buildingdto;
     }
+    public BuildingEntity convertToEntity(Buildingdto dto){
+        // modelmapper là 1 nơi trung gian để map giữa entity và dto nếu giống nhau sẽ set giá trị cho nhau
+        ModelMapper modelMapper = new ModelMapper();
+        BuildingEntity entity = modelMapper.map(dto, BuildingEntity.class);
+        return entity;
+    }
 }

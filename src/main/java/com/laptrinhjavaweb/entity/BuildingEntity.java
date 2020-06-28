@@ -14,7 +14,7 @@ public class BuildingEntity extends BaseEntity {
     private String name;
     @Column(name = "numberofbasement")
     private Integer numberOfBasement;
-    @Column(name = "buidingarea")
+    @Column(name = "buildingarea")
     private Integer buildingArea;
     @Column(name = "structure")
     private String strucTure;

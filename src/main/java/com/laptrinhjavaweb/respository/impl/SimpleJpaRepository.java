@@ -1,5 +1,6 @@
 package com.laptrinhjavaweb.respository.impl;
 
+import com.laptrinhjavaweb.annotation.Column;
 import com.laptrinhjavaweb.annotation.Entity;
 import com.laptrinhjavaweb.annotation.Table;
 import com.laptrinhjavaweb.mapper.ResultSetMapper;
@@ -8,6 +9,7 @@ import com.laptrinhjavaweb.respository.JpaRepository;
 import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.apache.commons.lang.StringUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.*;
@@ -169,5 +171,105 @@ public class SimpleJpaRepository<T> implements JpaRepository<T> {// ngoài T ta 
                 return new ArrayList<>();
             }
         }
+    }
+
+    @Override
+    public Long insert(Object object) {
+        String sql = createSQLInsert();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            Long id = null;
+            connection = EntityManagerFactory.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
+            Class<?> aClass = object.getClass();
+            Field[] fields = aClass.getDeclaredFields();
+            for (int i = 0; i < fields.length; i++) {
+                int index = i+1;
+                Field field = fields[i];
+                field.setAccessible(true);
+                statement.setObject(index, field.get(object));// hàm setObject dựa vào kiểu dữ liệu của field để set đúng kiểu
+            }
+            Class<?> parentClass = aClass.getSuperclass();
+            int indexParent = fields.length + 1;
+            while (parentClass != null) {
+                Field[] fieldsParent = parentClass.getDeclaredFields();
+                for (int i = 0; i < fieldsParent.length; i++) {
+                    Field field = fieldsParent[i];
+                    field.setAccessible(true);
+                    statement.setObject(indexParent, field.get(object));// hàm setObject dựa vào kiểu dữ liệu của field để set đúng kiểu
+                    indexParent++;
+                }
+                parentClass = parentClass.getSuperclass();
+            }
+            statement.executeUpdate();
+            resultSet = statement.getGeneratedKeys();
+            if (resultSet.next()) {
+                id = resultSet.getLong(1);
+            }
+            connection.commit();
+            return id;
+        }catch (SQLException | IllegalAccessException e) {
+            if (connection !=null){
+                try {
+                    connection.rollback();
+                }catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (statement !=null ) {
+                    statement.close();
+                }
+            }catch (SQLException e2) {
+                e2.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    private String createSQLInsert() {
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table tableClass = zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+        StringBuilder fields = new StringBuilder("");
+        StringBuilder params = new StringBuilder("");
+        for (Field field : zClass.getDeclaredFields()) {
+            if (fields.length() > 1) {
+                fields.append(",");
+                params.append(",");
+            }
+            if (field.isAnnotationPresent(Column.class)) {
+                Column column = field.getAnnotation(Column.class);
+                fields.append(column.name());
+                params.append("?");
+            }
+        }
+
+        Class<?> parentClass = zClass.getSuperclass();
+        while (parentClass != null) {
+            for (Field field : parentClass.getDeclaredFields()) {
+                if (fields.length() > 1) {
+                    fields.append(",");
+                    params.append(",");
+                }
+                if (field.isAnnotationPresent(Column.class)) {
+                    Column column = field.getAnnotation(Column.class);
+                    fields.append(column.name());
+                    params.append("?");
+                }
+            }
+            parentClass = parentClass.getSuperclass();
+        }
+        String sql = "INSERT INTO "+ tableName + "("+fields.toString()+") VALUES ("+params.toString()+")";
+        return sql;
     }
 }

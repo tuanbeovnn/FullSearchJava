@@ -10,5 +10,6 @@ import java.util.Map;
 
 public interface IBuildingService {
         List<Buildingdto> findAll(BuildingSearchBuilder fieldSearch, Pageable pageable);
+        Buildingdto save(Buildingdto buildingdto);
 
 }

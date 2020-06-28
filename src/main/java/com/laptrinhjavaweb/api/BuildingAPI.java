@@ -48,7 +48,12 @@ public class BuildingAPI extends HttpServlet {
     }
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        ObjectMapper mapper = new ObjectMapper();
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        Buildingdto buildingDto = HttpUtil.of(request.getReader()).toModel(Buildingdto.class);// nhận params là json và parse vào dto thông qua hàm tomodel
+        buildingDto = buildingService.save(buildingDto);
+        mapper.writeValue(response.getOutputStream(), buildingDto);// writevalue dùng để write json ra ngoài client từ dto
     }
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

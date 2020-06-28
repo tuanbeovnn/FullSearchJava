@@ -11,10 +11,7 @@ import com.laptrinhjavaweb.service.IBuildingService;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BuildingService implements IBuildingService {
@@ -51,6 +48,16 @@ public class BuildingService implements IBuildingService {
         return buildingEntities.stream()
                 .map(item -> buildingConverter.convertToDTO(item)).collect(Collectors.toList());
     }
+
+    @Override
+    public Buildingdto save(Buildingdto buildingdto) {
+        BuildingEntity buildingEntity = buildingConverter.convertToEntity(buildingdto);
+        buildingEntity.setCreatedDate(new Date());
+        buildingEntity.setCreatedBy("Tuan Nguyen");
+        Long id = buildingRepository.insert(buildingEntity);
+        return null;
+    }
+
     private String buildSqlSpecial(BuildingSearchBuilder fieldSearch){
         StringBuilder result = new StringBuilder("");
         if (StringUtils.isNotBlank(fieldSearch.getCostRentFrom())){

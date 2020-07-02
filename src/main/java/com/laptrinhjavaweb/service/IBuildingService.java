@@ -12,5 +12,6 @@ public interface IBuildingService {
         List<Buildingdto> findAll(BuildingSearchBuilder fieldSearch, Pageable pageable);
         Buildingdto save(Buildingdto buildingdto);
         Buildingdto findById(Long id);
+        void delete(Long id);
 
 }

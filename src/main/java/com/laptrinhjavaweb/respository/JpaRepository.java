@@ -11,5 +11,7 @@ public interface JpaRepository<T> { // T là kiểu dữ liệu ko tường minh
         List<T> findAll(String sql, Pageable pageable, Object... objects);
         Long insert(Object object);
         T findById(Long id);
+        void delete(Long id);
+        void update(Object object);
 
 }

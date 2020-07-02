@@ -7,6 +7,7 @@ import com.laptrinhjavaweb.mapper.ResultSetMapper;
 import com.laptrinhjavaweb.paging.Pageable;
 import com.laptrinhjavaweb.respository.JpaRepository;
 import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
+import javafx.scene.control.Tab;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Field;
@@ -271,6 +272,62 @@ public class SimpleJpaRepository<T> implements JpaRepository<T> {// ngoài T ta 
                 return null;
             }
         }
+    }
+
+    @Override
+    public void delete(Long id) {
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table tableClass = zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+        String sql = "DELETE FROM " + tableName + " WHERE id = ? ";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = EntityManagerFactory.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(sql);
+            statement.setObject(1, id);
+            statement.executeUpdate();
+            connection.commit();
+        }catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                }catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e2) {
+                e2.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void update(Object object) {
+        String sql = createSQLUpdate();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+    }
+
+    private String createSQLUpdate() {
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Entity.class) && zClass.isAnnotationPresent(Table.class)) {
+            Table tableClass = zClass.getAnnotation(Table.class);
+            tableName = tableClass.name();
+        }
+        return null;
     }
 
     private String createSQLInsert() {

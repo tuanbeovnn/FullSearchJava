@@ -65,6 +65,12 @@ public class BuildingService implements IBuildingService {
         return buildingdto;
     }
 
+    @Override
+    public void delete(Long id) {
+       
+
+    }
+
     private String buildSqlSpecial(BuildingSearchBuilder fieldSearch){
         StringBuilder result = new StringBuilder("");
         if (StringUtils.isNotBlank(fieldSearch.getCostRentFrom())){
